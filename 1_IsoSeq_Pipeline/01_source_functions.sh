@@ -283,7 +283,10 @@ run_sqanti3(){
     # remove temp SJ.out bed files
     rm *SJ.out.bed
   fi
-  
+
+  Rscript $SQ_Report $WKD_ROOT/8_sqanti3/$2/$sample"_classification.txt" $WKD_ROOT/8_sqanti3/$2/$sample"_junctions.txt"
+  Rscript $SQ_Report $WKD_ROOT/8_sqanti3/$2/$sample"_classification.filtered_lite_classification.txt" $WKD_ROOT/8_sqanti3/$2/$sample"_classification.filtered_lite_junctions.txt"
+
   source deactivate
 }
 
@@ -340,8 +343,9 @@ TAMA_sqanti_filter(){
   awk '{ print $4 }' $io_dir/$1.bed| cut -d ";" -f 2  > $io_dir/tama_retained_pbid.txt
   python $TAMASUBSETFASTA $sq_dir/$sqname".fasta" $io_dir/tama_retained_pbid.txt $io_dir/$1"_sqantifiltered_tamafiltered_classification.fasta"
   
-  Rscript $SQ_Report $WKD_ROOT/8b_filter_cont/tama/$2/$1"_sqantitamafiltered.classification.txt" $WKD_ROOT/8b_filter_cont/tama/$2/$1"_sqantitamafiltered.junction.txt"
+  Rscript $SQ_Report $WKD_ROOT/8b_filter_cont/tama/$2/$1"_sqantitamafiltered_classification.txt" $WKD_ROOT/8b_filter_cont/tama/$2/$1"_sqantitamafiltered_junctions.txt"
 }
+
 
 # remove_3ISM <sample> <mode=basic/full/nokallisto/lncrna>
 remove_3ISM(){
@@ -357,4 +361,25 @@ remove_3ISM(){
   $sq_dir/$1.collapsed_classification.filtered_lite.gtf \
   $sq_dir/$1.collapsed_classification.filtered_lite_junctions.txt $WKD_ROOT/8b_filter_cont/no3ISM/$2 $1
   
+}
+
+convert_gtf_bed12(){
+    
+    # variables 
+    output_dir="$(dirname $1)" 
+    sample=${1%.gtf} # removes .gtf
+
+  	source activate sqanti2_py3
+    cd $output_dir
+
+    gtfToGenePred $1 $sample.genePred
+    genePredToBed $sample.genePred > $sample.bed12
+    sort -k1,1 -k2,2n $sample.bed12 > $sample"_sorted.bed12"
+    rm $sample.genePred $sample.bed12
+    # Rscript script.R <input.classfile> <input_output_dir of bed file> <prefix>
+    #Rscript $GENERAL/annotate_uscs_tracks.R $SQANTI $WKD $sample
+    #bedToBigBed -extraIndex=name $sample $sample"_Modified.bed12" $REFERENCE/mm10.chrom.filtered.sizes $sample.bb
+
+    source deactivate
+    #./bedToBigBed -as=bedExample2.as -type=bed9+3 -extraIndex=name $sample"_Modified.bed12" $REFERENCE/mm10.chrom.filtered.sizes $sample.bb
 }

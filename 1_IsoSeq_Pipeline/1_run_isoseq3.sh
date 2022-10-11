@@ -21,7 +21,7 @@ echo
 
 # source config file and function script
 module load Miniconda2/4.3.21
-export SC_ROOT=/gpfs/mrc0/projects/Research_Project-MRC148213/sl693/scripts/UCL_Collab
+export SC_ROOT=/gpfs/mrc0/projects/Research_Project-MRC148213/sl693/scripts/UCL_FECD
 source $SC_ROOT/1_IsoSeq_Pipeline/fecd_isoseq.config
 source $SC_ROOT/1_IsoSeq_Pipeline/01_source_functions.sh
 
