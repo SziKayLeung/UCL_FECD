@@ -66,7 +66,7 @@ for i in {0..2}; do
   
   ### Subset by condition and by sample
   # subset cases and control by counts
-  Rscript $SQCOUNT -f ${sqfiles[i]} -m $WKD_ROOT/0_metadata/sample_metadata.txt -o ${dir[i]}
+  Rscript $SQCOUNT -f ${sqfiles[i]} -m $WKD_ROOT/0_metadata/sample_metadata.txt -o ${dir[i]} -d full
   
   # subset for each sample by counts 
   Rscript $SQCOUNT_SAMPLE -f ${sqfiles[i]} -m $WKD_ROOT/0_metadata/sample_metadata.txt -o ${dir[i]}
