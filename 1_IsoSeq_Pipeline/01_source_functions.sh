@@ -95,6 +95,29 @@ run_REFINE(){
   source deactivate
 }
 
+# refine2fasta <input_refine_dir>
+refine2fasta(){
+  input_fasta=($(ls $1/*flnc.bam))
+
+  source activate nanopore
+  
+  cd $1
+  
+  for i in ${input_fasta[@]}; do 
+    name=$(basename $i .flnc.bam)
+    echo "Processing: ${name}"
+    samtools bam2fq $i | seqtk seq -A > ${name}.flnc.fasta
+  done
+  
+  ls *fasta* 
+  cat *fasta* > All_flnc.fasta
+    
+  minimap2 -t 30 -ax splice -uf --secondary=no -C5 -O6,24 -B4 ${GENOME_FASTA} All_flnc.fasta > All_mapped.sam 2> All.map.log
+  samtools sort -O SAM All_mapped.sam > All_mapped_sorted.sam
+  
+  source activate sqanti2_py3
+  python ${CUPCAKE}/sequence/sam_to_gff3.py All_mapped_sorted.sam -i All_flnc.fasta -s ${SPECIES}
+}
 
 # merging_at_refine <output_name> <samples.....>
 # aim: merging bam files from refine onwards (similar to run_isoseq3_2_1_merge, but no need to rerun from ccs)
@@ -152,6 +175,22 @@ run_CLUSTER(){
 
 ################################################################################################
 #************************************* Post_Isoseq3 (Minimap2, Cupcake, Demultiplex) [Function 7,8]
+#run_minimap2 <input_fasta> <output_dir>
+run_minimap2(){
+  
+  source activate nanopore
+  name=$(basename $1 .fasta)
+  
+  cd $2
+  minimap2 -t 30 -ax splice -uf --secondary=no -C5 -O6,24 -B4 ${GENOME_FASTA} $1 > ${name}.sam 2> ${name}.map.log
+  samtools sort -O SAM ${name}.sam > ${name}_sorted.sam
+  
+  source activate sqanti2_py3
+  python ${CUPCAKE}/sequence/sam_to_gff3.py ${name}_sorted.sam -i $1 -s ${SPECIES}
+  gffread ${name}_sorted.gff3 -T -o ${name}_sorted.gtf
+  
+}
+
 # run_map_cupcakecollapse <output_name> 
 # Prerequisite: mm10 cage peak
 run_map_cupcakecollapse(){
